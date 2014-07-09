@@ -5,6 +5,8 @@ public class RopeShooter : MonoBehaviour
 {
 	public Transform hook;
 	public float hookSpeed;
+	private bool noMouse;
+	public float angle;
 	private Hook hookScript;
 	private DistanceJoint2D joint;
 	private PlayerController controller;
@@ -12,6 +14,7 @@ public class RopeShooter : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
+		angle = angle * Mathf.Deg2Rad;
 		controller = GetComponent<PlayerController>();
 		hookScript = hook.GetComponent<Hook>();
 		hookScript.shooter = this;
@@ -19,14 +22,21 @@ public class RopeShooter : MonoBehaviour
 		joint.connectedBody = hook.rigidbody2D;
 		joint.enabled = false;
 	}
-
+	public void SetNoMouse(bool state){
+		noMouse = state;
+	}
 
 	public void ShootRope()
 	{
 		joint.enabled = false;
 		hookScript.followPlayer = false;
-		Vector3 worldpoint=Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(0, 0, Mathf.Abs(Camera.main.transform.position.z)));
-		Vector3 direction = (worldpoint - transform.position).normalized;
+		Vector3 direction;
+		if (noMouse) {
+			direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+		} else {
+			Vector3 worldpoint = Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(0, 0, Mathf.Abs(Camera.main.transform.position.z)));
+			direction = (worldpoint - transform.position).normalized;
+		}
 		//Vector2 dir = new Vector2(direction.x,direction.y);
 		//hook.transform.position = transform.position;
 		//hook.position = transform.position+direction;
@@ -34,13 +44,15 @@ public class RopeShooter : MonoBehaviour
 		hookScript.SetSpeed(direction * hookSpeed);
 	}
 
-	public void CreateJoint(){
-		joint.distance = Vector2.Distance(transform.position , hook.position);
+	public void CreateJoint()
+	{
+		joint.distance = Vector2.Distance(transform.position, hook.position);
 		joint.enabled = true;
 		controller.onRope = true;
 	}
 
-	public void ReleaseRope(){
+	public void ReleaseRope()
+	{
 		joint.enabled = false;
 		controller.onRope = false;
 		//	hook.rigidbody2D.isKinematic = false;

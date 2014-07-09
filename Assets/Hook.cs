@@ -31,7 +31,7 @@ public class Hook : MonoBehaviour
 		//Debug.Log("speedset");
 		rigidbody2D.isKinematic = false;
 		//velocity = value;
-		transform.up = velocity;
+		transform.up = value.normalized;
 		rigidbody2D.velocity = value;
 	}
 

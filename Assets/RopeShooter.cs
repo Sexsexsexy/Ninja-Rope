@@ -22,26 +22,9 @@ public class RopeShooter : MonoBehaviour
 		joint.connectedBody = hook.rigidbody2D;
 		joint.enabled = false;
 	}
+
 	public void SetNoMouse(bool state){
 		noMouse = state;
-	}
-
-	public void ShootRope()
-	{
-		joint.enabled = false;
-		hookScript.followPlayer = false;
-		Vector3 direction;
-		if (noMouse) {
-			direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
-		} else {
-			Vector3 worldpoint = Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(0, 0, Mathf.Abs(Camera.main.transform.position.z)));
-			direction = (worldpoint - transform.position).normalized;
-		}
-		//Vector2 dir = new Vector2(direction.x,direction.y);
-		//hook.transform.position = transform.position;
-		//hook.position = transform.position+direction;
-		hook.position = transform.position;
-		hookScript.SetSpeed(direction * hookSpeed);
 	}
 
 	public void CreateJoint()
@@ -50,12 +33,30 @@ public class RopeShooter : MonoBehaviour
 		joint.enabled = true;
 		controller.onRope = true;
 	}
+	
+	public void ShootRope()
+	{
+		joint.enabled = false;
+		Vector3 direction;
+		if (noMouse) {
+			direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)).normalized;
+		} else {
+			Vector3 worldpoint = Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(0, 0, Mathf.Abs(Camera.main.transform.position.z)));
+			direction = (worldpoint - transform.position).normalized;
+		}
+		//Vector2 dir = new Vector2(direction.x,direction.y);
+		//hook.transform.position = transform.position;
+		//hook.position = transform.position+direction;
+		hookScript.Shoot(transform.position, direction*hookSpeed);
+//		hook.position = transform.position;
+//		hookScript.SetSpeed(direction * hookSpeed);
+	}
 
 	public void ReleaseRope()
 	{
 		joint.enabled = false;
 		controller.onRope = false;
 		//	hook.rigidbody2D.isKinematic = false;
-		hookScript.followPlayer = true;
+		hookScript.Release();
 	}
 }

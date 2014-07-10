@@ -18,5 +18,6 @@ public class CameraFollow : MonoBehaviour
 		if (player.position.x - transform.position.x>0) {
 			transform.Translate(xDiff*Vector3.right);
 		}
+		//transform.position = player.position-2*Vector3.forward;
 	}
 }

@@ -32,7 +32,6 @@ public abstract class Segment : MonoBehaviour
 	public void JoinSegmentFromRight(SegmentJoint previousEnd){
 		Vector2 dir = previousEnd.RightPoint - beginningJoint.LeftPoint;
 		transform.Translate(dir,Space.World);
-		Debug.Log(Vector2.Distance(previousEnd.RightPoint, beginningJoint.LeftPoint));
 	}
 	
 	public abstract void Randomize();

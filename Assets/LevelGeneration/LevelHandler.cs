@@ -10,8 +10,8 @@ public class LevelHandler : MonoBehaviour
 	public StartSegment startSegment;
 	public List<Segment> segmentsToUse;
 	public Transform player;
-//	private static int segmentNumber;
 	private static int currentDifficulty;
+
 	// Use this for initialization
 	void Awake()
 	{
@@ -20,8 +20,7 @@ public class LevelHandler : MonoBehaviour
 			allSegments.Add(seg);
 		}
 		UpdateAvailableSegments();
-		//		segmentNumber = allSegments.Count;
-		
+
 		activeSegments.Add(startSegment);
 		activeSegments.Add(startSegment);
 		activeSegments.Add(startSegment);
@@ -33,7 +32,7 @@ public class LevelHandler : MonoBehaviour
 
 		startSegment.transform.position = Vector2.zero;
 		player.transform.position = startSegment.StartPosition;
-		PassedSegment();
+		PassedSegment(activeSegments[1]);
 	}
 	
 	// Update is called once per frame
@@ -52,21 +51,20 @@ public class LevelHandler : MonoBehaviour
 				availableSegments.Add(segment);
 			}
 		}
-//		Debug.Log("Available Segments : " + availableSegments.Count);
 	}
 
-	public static void PassedSegment()
+	public static void PassedSegment(Segment passedSegment)
 	{
 		//availableSegments.Add(activeSegments [0]);
-		activeSegments.RemoveAt(0);
-		UpdateAvailableSegments();
-		activeSegments.Add(RandomSegment());
-//		activeSegments [0] = activeSegments [1];
-//		activeSegments [1] = activeSegments [2];
-//		activeSegments [2] = RandomSegment();
-		activeSegments [2].JoinSegmentFromRight(activeSegments [1].endJoint);
-		currentDifficulty++;
-		UpdateAvailableSegments();
+		if (passedSegment == activeSegments [1]) {
+			activeSegments.RemoveAt(0);
+			UpdateAvailableSegments();
+			activeSegments.Add(RandomSegment());
+			activeSegments [2].JoinSegmentFromRight(activeSegments [1].endJoint);
+			currentDifficulty++;
+			UpdateAvailableSegments();
+			//make use of passedSegment.points or something
+		}
 	}
 
 	private static Segment RandomSegment()

@@ -6,6 +6,7 @@ using System.Collections;
 public class SegmentJoint : MonoBehaviour
 {
 	private BoxCollider2D box;
+	private Segment parent;
 	public BoxCollider2D Box{
 		get{
 			return box;
@@ -30,12 +31,13 @@ public class SegmentJoint : MonoBehaviour
 
 	void Awake(){
 		box = FindObjectOfType<BoxCollider2D>();
+		parent = gameObject.GetComponentInParent<Segment>();
 	}
 
 	public void OnTriggerEnter2D(Collider2D col){
 		if (col.CompareTag("Player") && PlayerTrigger) {
-			LevelHandler.PassedSegment();
-			box.enabled=false;
+			LevelHandler.PassedSegment(parent);
+			//box.enabled=false;
 		}
 	}
 }

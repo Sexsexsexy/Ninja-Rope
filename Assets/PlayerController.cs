@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
 	public float ropeReleaseBoost;
 	public float tapLength;
 	public bool noMouse;
+	public float groundDistance;
 	[HideInInspector]
 	public bool
 		onRope;
@@ -29,11 +30,12 @@ public class PlayerController : MonoBehaviour
 		onGround = false;
 		onRope = false;
 		//rigidbody2D.velocity = Vector2.right * 10;
-	//	jumpTime = 0;
+		//	jumpTime = 0;
 	}
 
 	void Update()
 	{
+		CheckGround();
 		if (noMouse) {
 			if (Input.GetKeyDown(KeyCode.Space)) {
 				spaceHold = 0;
@@ -60,8 +62,8 @@ public class PlayerController : MonoBehaviour
 				} else if (onRope) {
 					Swing();
 				}
-			} else{
-				if(onGround){
+			} else {
+				if (onGround) {
 					rigidbody2D.AddForce((normalSpeed - rigidbody2D.velocity.x) * acceleration * Vector3.right * Time.deltaTime);
 
 				}
@@ -169,22 +171,35 @@ public class PlayerController : MonoBehaviour
 		shooter.ShootRope();
 	}
 
+	private void CheckGround()
+	{
+		//onGround = Physics2D.Raycast(transform.position, Vector3.down, groundDistance);
+		RaycastHit2D hit = Physics2D.Raycast(transform.position, -Vector2.up,groundDistance,LayerMask.GetMask("Ground"));
+		if (hit.collider != null) {
+			onGround = true;
+		} else {
+			onGround=false;
+		}
+		Debug.Log(onGround);
+
+
+	}
+
 	public void OnCollisionEnter2D(Collision2D col)
 	{
 		if (col.transform.CompareTag("Ground")) {
-			if(onRope){
+			if (onRope) {
 				ReleaseRope();
 			}
-			onGround = true;
 		}
 	}
 	
-	public void OnCollisionExit2D(Collision2D col)
-	{
-		if (col.transform.CompareTag("Ground")) {
-			onGround = false;
-		}
-	}
+//	public void OnCollisionExit2D(Collision2D col)
+//	{
+//		if (col.transform.CompareTag("Ground")) {
+//			onGround = false;
+//		}
+//	}
 }
 
 // Update is called once per frame

@@ -28,6 +28,7 @@ public class PlayerController : MonoBehaviour
 		shooter.SetNoMouse(noMouse);
 		onGround = false;
 		onRope = false;
+		//rigidbody2D.velocity = Vector2.right * 10;
 	//	jumpTime = 0;
 	}
 

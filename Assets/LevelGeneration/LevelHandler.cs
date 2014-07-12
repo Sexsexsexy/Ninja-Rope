@@ -13,25 +13,27 @@ public class LevelHandler : MonoBehaviour
 //	private static int segmentNumber;
 	private static int currentDifficulty;
 	// Use this for initialization
-	void Start()
+	void Awake()
 	{
 		currentDifficulty = 1;
 		foreach (Segment seg in segmentsToUse) {
 			allSegments.Add(seg);
 		}
 		UpdateAvailableSegments();
-//		segmentNumber = allSegments.Count;
-
+		//		segmentNumber = allSegments.Count;
+		
 		activeSegments.Add(startSegment);
 		activeSegments.Add(startSegment);
-		activeSegments.Add(RandomSegment());
+		activeSegments.Add(startSegment);
 
-		UpdateAvailableSegments();
+	}
+
+	void Start()
+	{
 
 		startSegment.transform.position = Vector2.zero;
 		player.transform.position = startSegment.StartPosition;
-
-		activeSegments [2].JoinSegmentFromRight(activeSegments [1].endJoint);
+		PassedSegment();
 	}
 	
 	// Update is called once per frame
@@ -50,7 +52,7 @@ public class LevelHandler : MonoBehaviour
 				availableSegments.Add(segment);
 			}
 		}
-		Debug.Log("Available Segments : " + availableSegments.Count);
+//		Debug.Log("Available Segments : " + availableSegments.Count);
 	}
 
 	public static void PassedSegment()

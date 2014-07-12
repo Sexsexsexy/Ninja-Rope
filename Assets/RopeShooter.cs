@@ -8,7 +8,7 @@ public class RopeShooter : MonoBehaviour
 	private bool noMouse;
 	public float angle;
 	private Hook hookScript;
-	private DistanceJoint2D joint;
+	private SpringJoint2D joint;
 	private PlayerController controller;
 
 	// Use this for initialization
@@ -18,8 +18,9 @@ public class RopeShooter : MonoBehaviour
 		controller = GetComponent<PlayerController>();
 		hookScript = hook.GetComponent<Hook>();
 		hookScript.shooter = this;
-		joint = GetComponent<DistanceJoint2D>();
+		joint = GetComponent<SpringJoint2D>();
 		joint.connectedBody = hook.rigidbody2D;
+		joint.connectedAnchor = hookScript.anchorPoint;
 		joint.enabled = false;
 	}
 

@@ -3,10 +3,12 @@ using System.Collections;
 
 public class Hook : MonoBehaviour
 {
+	public float maxDistance;
 	public RopeShooter shooter;
-	private Vector2 velocity;
 	public Transform player;
+	public Vector2 anchorPoint;
 	public bool followPlayer;
+	//private Vector2 velocity;
 	private bool drawLine;
 	private LineRenderer line;
 
@@ -24,8 +26,11 @@ public class Hook : MonoBehaviour
 //			//Debug.Log("shouldhavemoved");
 //		}
 		if (drawLine) {
-			line.SetPosition(0,player.position);
-			line.SetPosition(1,transform.position);
+			if(Vector2.Distance(player.position,transform.position)>maxDistance){
+				Release();
+			}
+			line.SetPosition(0, player.position);
+			line.SetPosition(1, transform.TransformPoint(anchorPoint));
 		}
 		if (followPlayer) {
 			transform.position = player.position;
@@ -43,22 +48,24 @@ public class Hook : MonoBehaviour
 //		rigidbody2D.velocity = value;
 //	}
 
-	public void Shoot(Vector2 start, Vector2 force){
+	public void Shoot(Vector2 start, Vector2 force)
+	{
 		followPlayer = false;
 		drawLine = true;
-		line.SetPosition(0,player.position);
-		line.SetPosition(1,transform.position);
+		line.SetPosition(0, player.position);
+		line.SetPosition(1, transform.position);
 		line.enabled = true;
 		//Debug.Log("speedset");
 		//velocity = value;
 		transform.position = start;
 		transform.up = force;
 		rigidbody2D.isKinematic = false;
-		rigidbody2D.AddForce (force);
+		rigidbody2D.AddForce(force);
 
 	}
 
-	public void Release(){
+	public void Release()
+	{
 		followPlayer = true;
 		drawLine = false;
 		line.enabled = false;
@@ -68,7 +75,7 @@ public class Hook : MonoBehaviour
 	{
 		if (!col.transform.CompareTag("Player")) {
 			rigidbody2D.isKinematic = true;
-			velocity = Vector2.zero;
+			//velocity = Vector2.zero;
 		}
 		shooter.CreateJoint();
 	}

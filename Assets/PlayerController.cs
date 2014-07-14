@@ -30,7 +30,6 @@ public class PlayerController : MonoBehaviour
 		onGround = false;
 		onRope = false;
 		//rigidbody2D.velocity = Vector2.right * 10;
-		//	jumpTime = 0;
 	}
 
 	void Update()
@@ -180,13 +179,14 @@ public class PlayerController : MonoBehaviour
 		} else {
 			onGround=false;
 		}
-		Debug.Log(onGround);
+//		Debug.Log(onGround);
 
 
 	}
 
 	public void OnCollisionEnter2D(Collision2D col)
 	{
+		Debug.Log("collision with + " + col.collider.tag);
 		if (col.transform.CompareTag("Ground")) {
 			if (onRope) {
 				ReleaseRope();

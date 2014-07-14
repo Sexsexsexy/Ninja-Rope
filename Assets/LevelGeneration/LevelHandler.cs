@@ -55,6 +55,7 @@ public class LevelHandler : MonoBehaviour
 
 	public static void PassedSegment(Segment passedSegment)
 	{
+		Debug.Log(passedSegment);
 		//availableSegments.Add(activeSegments [0]);
 		if (passedSegment == activeSegments [1]) {
 			activeSegments.RemoveAt(0);

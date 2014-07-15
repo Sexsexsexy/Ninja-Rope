@@ -9,23 +9,29 @@ public class CameraFollow : MonoBehaviour
 	public Vector2 playerOffset;
 	public float xSmoothing;
 	public float ySmoothing;// 0 doesnt move and 1 teleports
+	public bool justfollow;
 
 	// Use this for initialization
 	void Start()
 	{
 		//transform.Translate( (transform.position.x - player.position.x )*Vector3.right);//-Vector3.forward+3*Vector3.up;
+		transform.position = player.position - Vector3.forward;
 	}
 	
 	// Update is called once per frame
 	void Update()
 	{
-		float xDiff = player.position.x+playerOffset.x - transform.position.x;
-		float yDiff = player.position.y+playerOffset.y - transform.position.y;
-		if (Mathf.Abs(xDiff) > deadzone.x) {
-			transform.Translate(xDiff*xSmoothing*Vector3.right);
-		}
-		if (Mathf.Abs(yDiff) > deadzone.y) {
-			transform.Translate(yDiff*ySmoothing*Vector3.up);
+		if (justfollow) {
+			transform.Translate(player.position - transform.position - Vector3.forward);
+		} else {
+			float xDiff = player.position.x + playerOffset.x - transform.position.x;
+			float yDiff = player.position.y + playerOffset.y - transform.position.y;
+			if (Mathf.Abs(xDiff) > deadzone.x) {
+				transform.Translate(xDiff * xSmoothing * Vector3.right);
+			}
+			if (Mathf.Abs(yDiff) > deadzone.y) {
+				transform.Translate(yDiff * ySmoothing * Vector3.up);
+			}
 		}
 //		if (player.position.x - transform.position.x>0) {
 //			transform.Translate(xDiff*Vector3.right);

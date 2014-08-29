@@ -27,7 +27,7 @@ public abstract class Segment : MonoBehaviour
 	public SegmentJoint beginningJoint;
 	public SegmentJoint endJoint;
 	public int points;
-	public int difficulty;
+	public Difficulty difficulty;
 	
 	public void JoinSegmentFromRight(SegmentJoint previousEnd){
 		Vector2 dir = previousEnd.RightPoint - beginningJoint.LeftPoint;

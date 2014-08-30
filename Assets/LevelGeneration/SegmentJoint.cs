@@ -32,7 +32,8 @@ public class SegmentJoint : MonoBehaviour
 
 	void Awake()
 	{
-		box = FindObjectOfType<BoxCollider2D>();
+		//box = FindObjectOfType<BoxCollider2D>();
+		box = GetComponent<BoxCollider2D> ();
 		parent = gameObject.GetComponentInParent<Segment>();
 	}
 

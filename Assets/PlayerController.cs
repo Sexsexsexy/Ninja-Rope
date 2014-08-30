@@ -19,6 +19,8 @@ public class PlayerController : MonoBehaviour
 	private RopeShooter shooter;
 	//private float jumpTime;
 	private bool onGround;
+	private SpringJoint2D joint;
+
 	private float spaceHold;
 
 	Animator anim;
@@ -33,6 +35,8 @@ public class PlayerController : MonoBehaviour
 		anim = GetComponent<Animator> ();
 		onGround = false;
 		onRope = false;
+		joint = GetComponent<SpringJoint2D>();
+
 		//rigidbody2D.velocity = Vector2.right * 10;
 	}
 
@@ -40,6 +44,9 @@ public class PlayerController : MonoBehaviour
 	{
 		CheckGround();
 		if (noMouse) {
+//			if (onRope){
+//				joint.distance+=0.1f* Mathf.Sign(transform.position.x - shooter.hook.position.x);
+//			}
 			if (Input.GetKeyDown(KeyCode.Space)) {
 				spaceHold = 0;
 				if (!onRope && !onGround) {
@@ -67,6 +74,7 @@ public class PlayerController : MonoBehaviour
 					Swing();
 				}
 			} else {
+
 				if (onGround) {
 					rigidbody2D.AddForce((normalSpeed - rigidbody2D.velocity.x) * acceleration * Vector3.right * Time.deltaTime);
 

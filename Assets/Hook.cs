@@ -19,7 +19,7 @@ public class Hook : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
-		followPlayer = true;
+		followPlayer = false;
 		line = GetComponentInChildren<LineRenderer>();
 		linePoints = new List<Vector2>();
 		groundMask = LayerMask.GetMask("Ground");
@@ -109,6 +109,8 @@ public class Hook : MonoBehaviour
 	
 	public void Shoot(Vector2 start, Vector2 force)
 	{
+		transform.position = start;
+		transform.up = force;
 		followPlayer = false;
 		drawLine = true;
 		linePoints.Clear();
@@ -118,8 +120,6 @@ public class Hook : MonoBehaviour
 		DrawLine();
 		line.enabled = true;
 
-		transform.position = start;
-		transform.up = force;
 		rigidbody2D.isKinematic = false;
 		rigidbody2D.AddForce(force);
 
@@ -128,7 +128,7 @@ public class Hook : MonoBehaviour
 	public void Release()
 	{
 		hooked = false;
-		followPlayer = true;
+		//followPlayer = true;
 		drawLine = false;
 		line.enabled = false;
 		linePoints.Clear();

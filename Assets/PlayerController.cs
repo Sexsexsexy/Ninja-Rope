@@ -44,9 +44,9 @@ public class PlayerController : MonoBehaviour
 	{
 		CheckGround();
 		if (noMouse) {
-			if (onRope){
-				joint.distance+=0.1f* Mathf.Sign(transform.position.x - shooter.hook.position.x);
-			}
+//			if (onRope){
+//				joint.distance+=0.1f* Mathf.Sign(transform.position.x - shooter.hook.position.x);
+//			}
 			if (Input.GetKeyDown(KeyCode.Space)) {
 				spaceHold = 0;
 				if (!onRope && !onGround) {

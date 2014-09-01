@@ -1,14 +1,14 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
 public class Hook : MonoBehaviour
 {
 	public float maxDistance;
-	public RopeShooter shooter;
+	public RopeHandler shooter;
 	public Transform player;
 	public Vector2 anchorPoint;
-	private bool followPlayer;
+
 	private bool drawLine;
 	private LineRenderer line;
 	private List<Vector2> linePoints;
@@ -19,7 +19,6 @@ public class Hook : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
-		followPlayer = false;
 		line = GetComponentInChildren<LineRenderer>();
 		linePoints = new List<Vector2>();
 		groundMask = LayerMask.GetMask("Ground");
@@ -35,9 +34,6 @@ public class Hook : MonoBehaviour
 			}
 			DrawLine();		
 		}
-		if (followPlayer) {
-			transform.position = player.position;
-		} 
 	}
 
 	private void UpdateLine()
@@ -111,7 +107,6 @@ public class Hook : MonoBehaviour
 	{
 		transform.position = start;
 		transform.up = force;
-		followPlayer = false;
 		drawLine = true;
 		linePoints.Clear();
 		linePoints.Add(transform.position);
@@ -128,7 +123,6 @@ public class Hook : MonoBehaviour
 	public void Release()
 	{
 		hooked = false;
-		//followPlayer = true;
 		drawLine = false;
 		line.enabled = false;
 		linePoints.Clear();

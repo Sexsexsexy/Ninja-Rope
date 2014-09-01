@@ -75,7 +75,7 @@ public class LevelHandler : MonoBehaviour
 			Segment seg = activeSegments[0];
 			
 			if(seg.difficulty == currentDifficulty )
-				availableSegments.Add(seg); //  ADD CHECK FOR DIFFICULTY WHEN SEGMENTS HAVE DIFFICULTY
+				availableSegments.Add(seg);
 
 			activeSegments.Add(RandomSegment());
 

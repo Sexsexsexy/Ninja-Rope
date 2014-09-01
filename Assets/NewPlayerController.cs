@@ -59,6 +59,7 @@ public class NewPlayerController : MonoBehaviour
 		}
 		animator.SetBool("Swinging", onRope);
 		animator.SetBool("Jumping", !grounded);
+		animator.SetBool ("Sliding", sliding);
 	}
 
 	private void CheckGround()
@@ -82,6 +83,7 @@ public class NewPlayerController : MonoBehaviour
 	{
 		rigidbody2D.AddForce(dashForce * dash, ForceMode2D.Impulse);
 		dash = Vector2.zero;
+		animator.SetTrigger ("Dash");
 	}
 
 	private void Slide()

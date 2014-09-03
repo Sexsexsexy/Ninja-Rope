@@ -9,7 +9,7 @@ public class RopeHandler : MonoBehaviour
 	public float angle;
 	private Hook hookScript;
 	private SpringJoint2D joint;
-	private NewPlayerController controller;
+	private PlayerController controller;
 	private Vector2 shootDir;
 
 	// Use this for initialization
@@ -17,7 +17,7 @@ public class RopeHandler : MonoBehaviour
 	{
 		angle = angle * Mathf.Deg2Rad;
 		shootDir = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)).normalized;
-		controller = GetComponent<NewPlayerController>();
+		controller = GetComponent<PlayerController>();
 		hookScript = hook.GetComponent<Hook>();
 		hookScript.shooter = this;
 		joint = GetComponent<SpringJoint2D>();

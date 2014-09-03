@@ -128,6 +128,7 @@ public class Hook : MonoBehaviour
 		line.enabled = false;
 		linePoints.Clear();
 		line.SetVertexCount(0);
+		transform.position = new Vector3(-100, 0, 0);
 	}
 
 	public void OnCollisionEnter2D(Collision2D col)

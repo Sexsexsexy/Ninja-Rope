@@ -9,11 +9,12 @@ public class PlayerController : MonoBehaviour
 	public float jumpForce;
 	public float dashForce;
 	public float slideForce;
-	public bool onRope;
+	public float fallBoost;
 	public Transform groundCheck;
 	public float groundRadius;
 	public LayerMask whatIsGround;
 	public bool holdRope;
+	public bool onRope;
 
 	private RopeHandler ropeHandler;
 	private Animator animator;
@@ -64,13 +65,16 @@ public class PlayerController : MonoBehaviour
 
 	private void CheckGround()
 	{
+		bool oldgrounded = grounded;
 		grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
+		if (oldgrounded == false && grounded == true && rigidbody2D.velocity.x < 4)
+			rigidbody2D.AddForce(fallBoost * Vector2.right, ForceMode2D.Impulse);
 		//animator.SetBool("Jumping", !grounded);
 	}
 
 	private void Run()
 	{
-		rigidbody2D.AddForce((runSpeed - rigidbody2D.velocity.x) * runAcceleration * Vector2.right);
+		rigidbody2D.AddForce(Mathf.Clamp(runSpeed - rigidbody2D.velocity.x, -1, 1) * runAcceleration * Vector2.right);
 	}
 
 	private void Jump()

@@ -12,6 +12,8 @@ public class LevelHandler : MonoBehaviour
 	public StartSegment startSegment;
 	public List<Segment> segmentsToUse;
 	public Transform player;
+	public int buffer = 4;
+	public static int bufferLength;
 	private static int passedSegments;
 	private static Difficulty currentDifficulty;
 
@@ -23,6 +25,8 @@ public class LevelHandler : MonoBehaviour
 		activeSegments = new List<Segment>();
 		availableSegments = new List<Segment>();
 		passedSegments = 1;
+
+		bufferLength = buffer;
 
 		currentDifficulty = Difficulty.Beginner;
 
@@ -37,20 +41,20 @@ public class LevelHandler : MonoBehaviour
 			AllSegments [seg.difficulty].Add(seg);
 		}
 
-		
 		FillAvailableSegments();
-
-		activeSegments.Add(startSegment);
-		activeSegments.Add(startSegment);
-		activeSegments.Add(startSegment);
-
+		for (int i=0; i<bufferLength; i++) {
+			activeSegments.Add(startSegment);
+		}
 	}
 
 	void Start()
 	{
 		startSegment.transform.position = Vector2.zero;
 		player.transform.position = startSegment.StartPosition;
-		PassedSegment(activeSegments [1]);
+		for (int i = 0; i<bufferLength-2; i++) {
+			PassedSegment(activeSegments [1]);
+		}
+
 	}
 	
 	// Update is called once per frame
@@ -84,7 +88,7 @@ public class LevelHandler : MonoBehaviour
 			activeSegments.Add(RandomSegment());
 
 			activeSegments.Remove(seg);
-			activeSegments [2].JoinSegmentFromRight(activeSegments [1].endJoint);
+			activeSegments [bufferLength - 1].JoinSegmentFromRight(activeSegments [bufferLength - 2].endJoint);
 			passedSegments++;
 			//make use of passedSegment.points or something
 		}

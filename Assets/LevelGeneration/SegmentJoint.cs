@@ -19,31 +19,27 @@ public class SegmentJoint : MonoBehaviour
 	public Vector2 LeftPoint {
 		get {
 			Vector3 point = transform.position - box.bounds.extents.x * Vector3.right;
-			return point;//transform.TransformPoint(point);
+			return point;
 		}
 	}
 
 	public Vector2 RightPoint {
 		get {
 			Vector3 point = transform.position + box.bounds.extents.x * Vector3.right;
-			return point;// transform.TransformPoint(point);
+			return point;
 		}
 	}
 
 	void Awake()
 	{
-		//box = FindObjectOfType<BoxCollider2D>();
-		box = GetComponent<BoxCollider2D> ();
+		box = GetComponent<BoxCollider2D>();
 		parent = gameObject.GetComponentInParent<Segment>();
 	}
 
 	public void OnTriggerEnter2D(Collider2D col)
 	{
-		Debug.Log("trigged by " + col.tag);
-//		if (col.CompareTag("Player") && PlayerTrigger) {
-		if (PlayerTrigger && col.tag=="Player") {
+		if (PlayerTrigger && col.tag == "Player") {
 			LevelHandler.PassedSegment(parent);
-			//box.enabled=false;
 		}
 	}
 }

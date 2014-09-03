@@ -3,123 +3,135 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
-	public float airResistance;
-	public float normalSpeed;
-	public float maxSpeed;
-	public float jumpSpeed;
-	public float acceleration;
-	public float tapLength;
-	public bool noMouse;
-	public float groundDistance;
-	public float groundCheckRadius;
-	[HideInInspector]
-	public bool
-		onRope;
-	private RopeHandler shooter;
-	//private float jumpTime;
-	private bool onGround;
-	private SpringJoint2D joint;
 
-	private float spaceHold;
+	public float runSpeed;
+	public float runAcceleration;
+	public float jumpForce;
+	public float dashForce;
+	public float slideForce;
+	public bool onRope;
+	public Transform groundCheck;
+	public float groundRadius;
+	public LayerMask whatIsGround;
+	public bool holdRope;
 
-	Animator anim;
+	private RopeHandler ropeHandler;
+	private Animator animator;
+	private bool grounded;
+	private bool sliding;
+	private bool jump;
+	private bool slide;
+	private Vector2 dash;
 
-
-	// Use this for initialization
 
 	void Start()
 	{
-		rigidbody2D.drag = airResistance;
-		shooter = GetComponent<RopeHandler>();
-		shooter.SetNoMouse(noMouse);
-		anim = GetComponent<Animator>();
-		onGround = false;
-		onRope = false;
-		joint = GetComponent<SpringJoint2D>();
-
-		//rigidbody2D.velocity = Vector2.right * 10;
+		ropeHandler = GetComponent<RopeHandler>();
+		animator = GetComponent<Animator>();
 	}
-
+	
 	void Update()
 	{
+
+	}
+
+	void FixedUpdate()
+	{
 		CheckGround();
-		if (noMouse) {
-//			if (onRope){
-//				joint.distance+=0.1f* Mathf.Sign(transform.position.x - shooter.hook.position.x);
-//			}
-			if (Input.GetKeyDown(KeyCode.Space)) {
-				spaceHold = 0;
-				if (!onRope && !onGround) {
-					ShootRope();
-				}
-				if (onGround) { 
-					Jump();
-				}
-			} else if (Input.GetKeyUp(KeyCode.Space)) {
-				if (spaceHold < tapLength) {
-					//tapped space
-					if (onRope) {
-						ReleaseRope();
-					}
-				} else {
-					//released space after holding it
-				}
-			} else if (Input.GetKey(KeyCode.Space)) {
-				//will always happen when you hold down space
-				spaceHold += Time.deltaTime;
-			} else {
-				if (onGround) {
-					rigidbody2D.AddForce((normalSpeed - rigidbody2D.velocity.x) * acceleration * Vector3.right * Time.deltaTime);
-				}
+		if (grounded) {
+			if (jump) {
+				Jump();
+				//jump = false;
+			}
+			if (slide) {
+				Slide();
+				//slide = false;
+			}
+			if (sliding) {
+				if (rigidbody2D.velocity.x < 1)
+					sliding = false;
+			} else
+				Run();
+		} else {
+			if (dash != Vector2.zero) {
+				Dash();
 			}
 		}
-		anim.SetBool("Swinging", onRope);
-		anim.SetBool("Jumping", !onGround);
-	}
-
-	private void Jump()
-	{
-		rigidbody2D.AddForce(jumpSpeed * Vector3.up, ForceMode2D.Impulse);
-	}
-
-	private void ReleaseRope()
-	{
-		shooter.ReleaseRope();
-	}
-
-	private void ShootRope()
-	{
-		shooter.ShootRope();
+		animator.SetBool("Swinging", onRope);
+		animator.SetBool("Jumping", !grounded);
+		animator.SetBool("Sliding", sliding);
 	}
 
 	private void CheckGround()
 	{
-		//onGround = Physics2D.Raycast(transform.position, Vector3.down, groundDistance);
-		//Physics2D.OverlapCircle(transform.position + groundDistance);
-		RaycastHit2D hit = Physics2D.Raycast(transform.position, -Vector2.up, groundDistance, LayerMask.GetMask("Ground"));
-		if (hit.collider != null) {
-			onGround = true;
-		} else {
-			onGround = false;
-		}
-//		Debug.Log(onGround);
+		grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
+		//animator.SetBool("Jumping", !grounded);
+	}
 
+	private void Run()
+	{
+		rigidbody2D.AddForce((runSpeed - rigidbody2D.velocity.x) * runAcceleration * Vector2.right);
+	}
 
+	private void Jump()
+	{
+		rigidbody2D.AddForce(jumpForce * Vector2.up, ForceMode2D.Impulse);
+		jump = false;
+	}
+
+	private void Dash()
+	{
+		rigidbody2D.AddForce(dashForce * dash, ForceMode2D.Impulse);
+		dash = Vector2.zero;
+		animator.SetTrigger("Dash");
+	}
+
+	private void Slide()
+	{
+		rigidbody2D.AddForce(slideForce * Vector2.right, ForceMode2D.Impulse);
+		slide = false;
+		sliding = true;
 	}
 
 	public void OnCollisionEnter2D(Collision2D col)
 	{
 		if (col.transform.CompareTag("Ground")) {
 			if (onRope) {
-				ReleaseRope();
+				ropeHandler.ReleaseRope();
 			}
+		} else if (col.transform.CompareTag("Deadly")) {
+
 		}
 	}
-	
-//	public void OnCollisionExit2D(Collision2D col)
-//	{
-//		if (col.transform.CompareTag("Ground")) {
-//			onGround = false;
-//		}
-//	}
+
+	// This section handles the input
+	public void Pressed()
+	{
+		if (grounded) {
+			jump = true;
+		} else {
+			if (!onRope)
+				ropeHandler.ShootRope();
+			else if (!holdRope)
+				ropeHandler.ReleaseRope();
+		}
+	}
+
+	public void Released()
+	{
+		if (onRope && holdRope) {
+			ropeHandler.ReleaseRope();
+		}
+	}
+
+	public void Swipe(Vector2 dir)
+	{
+		if (grounded) {
+			slide = true;
+		} else {
+			if (!onRope)
+				dash = dir;
+		}
+	}
+
 }

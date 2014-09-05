@@ -41,6 +41,7 @@ public class Hook : MonoBehaviour
 		if (!hooked) {
 			linePoints [0] = transform.TransformPoint(anchorPoint);
 		}
+
 		linePoints.RemoveAt(linePoints.Count - 1);
 		Vector2 playerPoint = player.position;
 		Vector2 currentJoint = linePoints [linePoints.Count - 1];

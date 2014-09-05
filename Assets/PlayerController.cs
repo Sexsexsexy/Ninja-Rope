@@ -10,16 +10,19 @@ public class PlayerController : MonoBehaviour
 	public float dashForce;
 	public float slideForce;
 	public float fallBoost;
+	public float wallRunForce;
 	public Transform groundCheck;
 	public float groundRadius;
 	public LayerMask whatIsGround;
 	public bool holdRope;
 	public bool onRope;
 
+
 	private RopeHandler ropeHandler;
 	private Animator animator;
 	private bool grounded;
 	private bool sliding;
+	private bool wallRunning;
 	private bool jump;
 	private bool slide;
 	private Vector2 dash;
@@ -39,6 +42,7 @@ public class PlayerController : MonoBehaviour
 	void FixedUpdate()
 	{
 		CheckGround();
+		CheckWallRun();
 		if (grounded) {
 			if (jump) {
 				Jump();
@@ -61,15 +65,32 @@ public class PlayerController : MonoBehaviour
 		animator.SetBool("Swinging", onRope);
 		animator.SetBool("Jumping", !grounded);
 		animator.SetBool("Sliding", sliding);
+		Debug.Log(wallRunning);
 	}
 
 	private void CheckGround()
 	{
 		bool oldgrounded = grounded;
 		grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
-		if (oldgrounded == false && grounded == true && rigidbody2D.velocity.x < 4)
-			rigidbody2D.AddForce(fallBoost * Vector2.right, ForceMode2D.Impulse);
-		//animator.SetBool("Jumping", !grounded);
+		if (grounded) {
+			if (oldgrounded == false && rigidbody2D.velocity.x < 4)
+				rigidbody2D.AddForce(fallBoost * Vector2.right, ForceMode2D.Impulse); 
+		}
+	}
+
+	private void CheckWallRun()
+	{
+		if (wallRunning && jump) {
+			jump = false;
+			wallRunning = false;
+			rigidbody2D.AddForce(jumpForce * (-Vector2.right + Vector2.up), ForceMode2D.Impulse);
+		} else if (Physics2D.Raycast(groundCheck.position, Vector2.right, 1, whatIsGround)) {
+			wallRunning = true;
+			rigidbody2D.AddForce(wallRunForce * Vector2.up);
+			Run();
+		} else {
+			wallRunning = false;
+		}
 	}
 
 	private void Run()
@@ -111,7 +132,7 @@ public class PlayerController : MonoBehaviour
 	// This section handles the input
 	public void Pressed()
 	{
-		if (grounded) {
+		if (grounded || wallRunning) {
 			jump = true;
 		} else {
 			if (!onRope)

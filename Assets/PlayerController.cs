@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
 	public float slideForce;
 	public float fallBoost;
 	public float wallRunForce;
+	public float maxWallRunTime;
 	public Transform groundCheck;
 	public float groundRadius;
 	public LayerMask whatIsGround;
@@ -121,9 +122,9 @@ public class PlayerController : MonoBehaviour
 	public void OnCollisionEnter2D(Collision2D col)
 	{
 		if (col.transform.CompareTag("Ground")) {
-			if (onRope) {
-				ropeHandler.ReleaseRope();
-			}
+			//if (onRope) {
+			ropeHandler.ReleaseRope();
+			//}
 		} else if (col.transform.CompareTag("Deadly")) {
 
 		}

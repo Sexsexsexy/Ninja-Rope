@@ -8,19 +8,28 @@ public class Hook : MonoBehaviour
 	public RopeHandler shooter;
 	public Transform player;
 	public Vector2 anchorPoint;
+	public float offset = 0.05f;
 
 	private bool drawLine;
 	private LineRenderer line;
 	private List<Vector2> linePoints;
 	private bool hooked;
-	private List<Vector2> unwindLimit; // describes at which x-position (x) and direction sign (y)you cant unwind
+	private List<Vector2> unwindLimits; // describes at which x-position (x) and in which direction sign (y) you can unwind
 	private LayerMask groundMask;
+	private EdgeCollider2D edge;
+	private Vector2 newJoint;
+	private Vector3 oldPos;
 
 	// Use this for initialization
 	void Start()
 	{
-		line = GetComponentInChildren<LineRenderer>();
+		edge = transform.parent.gameObject.GetComponentInChildren<EdgeCollider2D>();
+		edge.enabled = false;
+		Debug.Log(edge);
+		//edge.points=new Vector2[10];
+		line = GetComponent<LineRenderer>();
 		linePoints = new List<Vector2>();
+		unwindLimits = new List<Vector2>();
 		groundMask = LayerMask.GetMask("Ground");
 	}
 	
@@ -29,56 +38,95 @@ public class Hook : MonoBehaviour
 	{
 		if (drawLine) {
 			UpdateLine();
+			//UpdateEdge();
 			if (!hooked && Vector2.Distance(player.position, transform.position) > maxDistance) {
 				Release();//this may need rethinking since we have a springjoint now...
 			}
 			DrawLine();		
 		}
+		oldPos = player.position;
 	}
+
+	public void RopeHit(Collision2D col, Vector2 colliderOffset)
+	{
+		if (col.transform.CompareTag("Ground")) {
+			ContactPoint2D contact = col.contacts [0];
+			foreach (ContactPoint2D point in col.contacts) {
+				if (point.point.y < contact.point.y) {
+					contact = point;
+				}
+			}
+			newJoint = contact.point - contact.normal * offset + colliderOffset;
+		} else if (col.transform.CompareTag("Deadly")) {
+			Release();
+		}
+	}
+
+//	private void UpdateEdge(){
+//		for(int i=)
+//	}
 
 	private void UpdateLine()
 	{
+		// if we are not yet hooked we want to move the line and the collider with the hook
 		if (!hooked) {
 			linePoints [0] = transform.TransformPoint(anchorPoint);
 		}
-
 		linePoints.RemoveAt(linePoints.Count - 1);
 		Vector2 playerPoint = player.position;
 		Vector2 currentJoint = linePoints [linePoints.Count - 1];
 
-		//Checking if there is anything between the player and the current joint. If there is we will move the joint to that position and divide our line.
 
-		RaycastHit2D hit = Physics2D.Raycast(playerPoint, currentJoint - playerPoint, Vector2.Distance(playerPoint, currentJoint) - 0.05f, groundMask);
+		// new solution using line collider!
 
-		if (hit.collider != null) {
-			/*if there is something between the player and the joint  we move the joint to the rayhitposition and shorten the line.
-			We also  add the point to the list so that a rope between the previous joint and the new one will be drawn*/
-			float dist = -Vector2.Distance(currentJoint, hit.point);
-			linePoints.Add(hit.point);
-			shooter.MoveJoint(hit.point, dist);
+		//if we have a new joint lets fix it!
+		if (newJoint != Vector2.zero) {
+			unwindLimits.Add(new Vector2(playerPoint.x, -player.rigidbody2D.velocity.x));
+			float dist = -Vector2.Distance(currentJoint, newJoint);
+			linePoints.Add(newJoint);
+			shooter.MoveJoint(newJoint, dist);
+			newJoint = Vector2.zero;
+		}
 
-		} else if (linePoints.Count > 1) {
-			/*if there is nothing between and the joint is not the hook we must check if we should unwind the rope. 
-			To do that we cast a ray between the player and the old joint*/
+		// then we check if we should unwind
+		if (linePoints.Count > 1) {
+			//new solution
+			Vector2 from = playerPoint - currentJoint;
+			Vector2 to = linePoints [linePoints.Count - 2] - currentJoint;
+			float angle = CheckAngle(from, to);
+			Debug.Log(angle);
 
-			Vector2 oldJoint = linePoints [linePoints.Count - 2];
-			hit = Physics2D.Raycast(playerPoint, oldJoint - playerPoint, Vector2.Distance(playerPoint, oldJoint) - 0.05f, groundMask);
+			if (angle > 180) {
+				Debug.Log("Time to unwind!");
+				Vector2 oldJoint = linePoints [linePoints.Count - 2];
+				float dist = Vector2.Distance(oldJoint, currentJoint);
+				linePoints.RemoveAt(linePoints.Count - 1);
+				shooter.MoveJoint(oldJoint, dist);
+			}
+			/*
+			 * old solution
+			if (unwindLimits.Count > 0) {
+				Vector2 unwind = unwindLimits [unwindLimits.Count - 1];
 
-			if (hit.collider == null) {
-				/* if there is nothing in the way we should probably unwind the rope. First we should jus check if the rope will move through something. 
-				We check this approximately by casting several rays in an arc (between the current joint and the player) to a point between the current and the old joint.*/
-
-				if (ArcCast(currentJoint, playerPoint, oldJoint + (playerPoint - oldJoint) * 0.01f, 0.2f, groundMask).collider == null) {
+				if ((unwind.y < 0 && playerPoint.x < unwind.x && player.rigidbody2D.velocity.x < 0)
+					|| (unwind.y > 0 && playerPoint.x > unwind.x && player.rigidbody2D.velocity.x > 0)) {
+					Debug.Log("Time to unwind!");
+					Vector2 oldJoint = linePoints [linePoints.Count - 2];
 					float dist = Vector2.Distance(oldJoint, currentJoint);
 					linePoints.RemoveAt(linePoints.Count - 1);
 					shooter.MoveJoint(oldJoint, dist);
 				}
 			}
+*/
 		}
 
-		linePoints.Add(playerPoint);
-	}
 
+		//now we add player position as the end point for the line and collider
+
+		linePoints.Add(playerPoint);
+		edge.points = linePoints.ToArray();
+	}
+/*
 	private RaycastHit2D ArcCast(Vector2 from, Vector2 to, Vector2 center, float interpolation, LayerMask mask)
 	{
 		Vector2 current = Vector2.Lerp(from, to, interpolation);
@@ -94,16 +142,29 @@ public class Hook : MonoBehaviour
 		}
 		return hit;
 	}
+*/
 
+	//Returns the counterclockwise angle between two vectors (from first to second) 
+	private float CheckAngle(Vector2 from, Vector2 toVec)
+	{
+		float ang = Vector2.Angle(from, toVec);
+		Vector3 cross = Vector3.Cross(from, toVec);
+		
+		if (cross.z < 0)
+			ang = 360 - ang;	
+		return ang;
+	}
+
+	// This may need optimization
 	private void DrawLine()
 	{
 		line.SetVertexCount(linePoints.Count);
 		for (int i = 0; i<linePoints.Count; i++) {
 			line.SetPosition(i, linePoints [i]);
 		}
-
 	}
-	
+
+
 	public void Shoot(Vector2 start, Vector2 force)
 	{
 		transform.position = start;
@@ -112,17 +173,18 @@ public class Hook : MonoBehaviour
 		linePoints.Clear();
 		linePoints.Add(transform.position);
 		linePoints.Add(player.position);
-
 		DrawLine();
 		line.enabled = true;
-
+		edge.enabled = true;
+		edge.points = linePoints.ToArray();
+		rigidbody2D.velocity = Vector2.zero;
 		rigidbody2D.isKinematic = false;
 		rigidbody2D.AddForce(force);
-
 	}
 
 	public void Release()
 	{
+		edge.enabled = false;
 		hooked = false;
 		drawLine = false;
 		line.enabled = false;
@@ -137,9 +199,7 @@ public class Hook : MonoBehaviour
 			UpdateLine();
 			hooked = true;
 			rigidbody2D.isKinematic = true;
-			//velocity = Vector2.zero;
 			shooter.CreateJoint(transform.TransformPoint(anchorPoint));
-
 		}
 	}
 }

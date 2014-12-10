@@ -3,52 +3,83 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
-
+    //Movement vars
 	public float runSpeed;
 	public float runAcceleration;
 	public float jumpForce;
 	public float dashForce;
 	public float slideForce;
 	public float fallBoost;
-	public float wallRunForce;
-	public float maxWallRunTime;
+
+    //Wall vars
+    private int direction;
+    private bool wallRunning;
+    private bool canWallRun;
+    private int wallRunTimer;
+    private int ledgeTimer;
+
+    public float ledgePullForce;
+    public float wallRunForce;
+    public float wallSlideForce;
+    public int maxWallRunFrames;
+    public int maxLedgeGrabFrames;
+    public int ledgeCooldown;
+
+    public Vector2 topReach;
+    public Vector2 botReach;
+
 	public Transform groundCheck;
 	public float groundRadius;
 	public LayerMask whatIsGround;
+
 	public bool holdRope;
 	public bool onRope;
 
+	public BoxCollider2D topCollider;
+	public BoxCollider2D botCollider;
 
 	private RopeHandler ropeHandler;
 	private Animator animator;
 	private bool grounded;
 	private bool sliding;
-	private bool wallRunning;
 	private bool jump;
 	private bool slide;
 	private Vector2 dash;
-
 
 	void Start()
 	{
 		ropeHandler = GetComponent<RopeHandler>();
 		animator = GetComponent<Animator>();
+        wallRunTimer = 0;
+        direction = 1;
+        ledgeTimer = maxLedgeGrabFrames;
 	}
 	
 	void Update()
 	{
-
 	}
 
 	void FixedUpdate()
 	{
 		CheckGround();
 		CheckWallRun();
+
+        if (jump)
+        {
+            Jump();
+            //jump = false;
+        }
+
 		if (grounded) {
-			if (jump) {
-				Jump();
-				//jump = false;
-			}
+
+            canWallRun = true;
+            direction = 1;
+
+            wallRunTimer = 0;
+
+            if (ledgeTimer > maxLedgeGrabFrames)
+                ledgeTimer--;
+
 			if (slide) {
 				Slide();
 				//slide = false;
@@ -63,35 +94,71 @@ public class PlayerController : MonoBehaviour
 				Dash();
 			}
 		}
+
+        if (rigidbody2D.velocity.y < 0)
+            canWallRun = false;
+
 		animator.SetBool("Swinging", onRope);
 		animator.SetBool("Jumping", !grounded);
 		animator.SetBool("Sliding", sliding);
-		Debug.Log(wallRunning);
 	}
+
+    void apa(int apaapa)
+    {
+
+    }
 
 	private void CheckGround()
 	{
-		bool oldgrounded = grounded;
 		grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
-		if (grounded) {
-			if (oldgrounded == false && rigidbody2D.velocity.x < 4)
-				rigidbody2D.AddForce(fallBoost * Vector2.right, ForceMode2D.Impulse); 
-		}
 	}
 
 	private void CheckWallRun()
 	{
-		if (wallRunning && jump) {
-			jump = false;
-			wallRunning = false;
-			rigidbody2D.AddForce(jumpForce * (-Vector2.right + Vector2.up), ForceMode2D.Impulse);
-		} else if (Physics2D.Raycast(groundCheck.position, Vector2.right, 1, whatIsGround)) {
-			wallRunning = true;
-			rigidbody2D.AddForce(wallRunForce * Vector2.up);
-			Run();
-		} else {
-			wallRunning = false;
-		}
+        Vector2 topPoint = new Vector2(transform.position.x + topReach.x * direction, transform.position.y + topReach.y);
+        Collider2D topcol = Physics2D.OverlapPoint(topPoint);
+
+        Vector2 botPoint = new Vector2(transform.position.x + botReach.x * direction, transform.position.y + botReach.y);
+        Collider2D botcol = Physics2D.OverlapPoint(botPoint);
+
+        wallRunning = false;
+
+        if (botcol == null)
+        {
+            Debug.Log("Bot null");
+            return;
+        }
+
+        if (topcol == null)
+        {
+            //Ledgegrab
+            int maxvel = 10;
+            if (ledgeTimer <= maxLedgeGrabFrames && rigidbody2D.velocity.y < maxvel)
+            {
+                if (ledgeTimer <= 0)
+                    ledgeTimer = ledgeCooldown;
+
+                rigidbody2D.AddForce(new Vector2(ledgePullForce / 4, ledgePullForce), ForceMode2D.Impulse);
+            }
+        }
+        else
+        {
+            wallRunning = true;
+
+            //Wallrun
+            if (rigidbody2D.velocity.y >= 0 && canWallRun)
+            {
+                rigidbody2D.AddForce(new Vector2(0, wallRunForce));
+                wallRunTimer++;
+
+                if (wallRunTimer >= maxWallRunFrames)
+                    canWallRun = false;
+            }
+            else
+            {
+                rigidbody2D.AddForce(new Vector2(0, Mathf.Clamp(wallSlideForce - rigidbody2D.velocity.y * 2,0,1) * wallSlideForce));
+            }
+        }
 	}
 
 	private void Run()
@@ -101,8 +168,25 @@ public class PlayerController : MonoBehaviour
 
 	private void Jump()
 	{
-		rigidbody2D.AddForce(jumpForce * Vector2.up, ForceMode2D.Impulse);
-		jump = false;
+        if (wallRunning)
+        {
+            canWallRun = true;
+
+            direction = -direction;
+
+            float yfactor = 0.60f;
+            float xfactor = 0.70f;
+
+            rigidbody2D.AddForce(jumpForce * new Vector2(xfactor * direction, yfactor), ForceMode2D.Impulse);
+
+            jump = false;
+            wallRunTimer = maxWallRunFrames / 2;
+        }
+        else if( grounded)
+        {
+            rigidbody2D.AddForce(jumpForce * Vector2.up, ForceMode2D.Impulse);
+            jump = false;
+        }
 	}
 
 	private void Dash()

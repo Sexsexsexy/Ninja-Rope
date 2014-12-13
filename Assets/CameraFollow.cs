@@ -33,6 +33,7 @@ public class CameraFollow : MonoBehaviour
 				transform.Translate(yDiff * ySmoothing * Vector3.up);
 			}
 		}
+
 //		if (player.position.x - transform.position.x>0) {
 //			transform.Translate(xDiff*Vector3.right);
 //		}

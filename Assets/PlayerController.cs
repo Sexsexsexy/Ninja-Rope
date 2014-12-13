@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour
     //Wall vars
     private int direction;
     private bool wallRunning;
+    private bool wallSliding;
     private bool canWallRun;
     private int wallRunTimer;
     private int ledgeTimer;
@@ -49,7 +50,8 @@ public class PlayerController : MonoBehaviour
 	void Start()
 	{
 		ropeHandler = GetComponent<RopeHandler>();
-		animator = GetComponent<Animator>();
+        animator = transform.FindChild("SpriteHandler").GetComponent<Animator>();
+
         wallRunTimer = 0;
         direction = 1;
         ledgeTimer = maxLedgeGrabFrames;
@@ -98,9 +100,15 @@ public class PlayerController : MonoBehaviour
         if (rigidbody2D.velocity.y < 0)
             canWallRun = false;
 
+        if (rigidbody2D.velocity.x > 0)
+            ResetDirection();
+
 		animator.SetBool("Swinging", onRope);
 		animator.SetBool("Jumping", !grounded);
 		animator.SetBool("Sliding", sliding);
+        animator.SetBool("WallRunning", wallRunning);
+        animator.SetBool("WallSliding", wallSliding);
+
 	}
 
     void apa(int apaapa)
@@ -121,7 +129,9 @@ public class PlayerController : MonoBehaviour
         Vector2 botPoint = new Vector2(transform.position.x + botReach.x * direction, transform.position.y + botReach.y);
         Collider2D botcol = Physics2D.OverlapPoint(botPoint);
 
+        bool wasrunning = wallRunning;
         wallRunning = false;
+        wallSliding = false;
 
         if (botcol == null)
         {
@@ -146,16 +156,21 @@ public class PlayerController : MonoBehaviour
             wallRunning = true;
 
             //Wallrun
-            if (rigidbody2D.velocity.y >= 0 && canWallRun)
+            if (rigidbody2D.velocity.y > 0 && canWallRun)
             {
                 rigidbody2D.AddForce(new Vector2(0, wallRunForce));
                 wallRunTimer++;
 
                 if (wallRunTimer >= maxWallRunFrames)
+                {
+                    wallRunning = false;
                     canWallRun = false;
+                    wallSliding = false;
+                }
             }
             else
             {
+                wallSliding = true;
                 rigidbody2D.AddForce(new Vector2(0, Mathf.Clamp(wallSlideForce - rigidbody2D.velocity.y * 2,0,1) * wallSlideForce));
             }
         }
@@ -168,11 +183,13 @@ public class PlayerController : MonoBehaviour
 
 	private void Jump()
 	{
-        if (wallRunning)
+        if ((wallRunning || wallSliding) && rigidbody2D.velocity.y != 0)
         {
             canWallRun = true;
 
             direction = -direction;
+
+            transform.FindChild("SpriteHandler").localScale = new Vector3(direction, 1, 1);
 
             float yfactor = 0.60f;
             float xfactor = 0.70f;
@@ -181,6 +198,7 @@ public class PlayerController : MonoBehaviour
 
             jump = false;
             wallRunTimer = maxWallRunFrames / 2;
+           
         }
         else if( grounded)
         {
@@ -188,6 +206,14 @@ public class PlayerController : MonoBehaviour
             jump = false;
         }
 	}
+
+    private void ResetDirection()
+    {
+        if (rigidbody2D.velocity.x > 0)
+            direction = 1;
+
+        transform.FindChild("SpriteHandler").localScale = new Vector3(direction, 1, 1);
+    }
 
 	private void Dash()
 	{

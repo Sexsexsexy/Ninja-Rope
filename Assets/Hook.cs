@@ -8,17 +8,16 @@ public class Hook : MonoBehaviour
 	public RopeHandler shooter;
 	public Transform player;
 	public Vector2 anchorPoint;
-	public float offset = 0.05f;
-
+	public float offset = -0.05f; //should be nagative!! (it is the length by which the middle of the rope is moved away from object it is bending around
 	private bool drawLine;
 	private LineRenderer line;
 	private List<Vector2> linePoints;
 	private bool hooked;
-	private List<Vector2> unwindLimits; // describes at which x-position (x) and in which direction sign (y) you can unwind
+	//private List<Vector2> unwindLimits; // describes at which x-position (x) and in which direction sign (y) you can unwind
 	private LayerMask groundMask;
 	private EdgeCollider2D edge;
 	private Vector2 newJoint;
-	private Vector3 oldPos;
+	//private Vector3 oldPos;
 
 	// Use this for initialization
 	void Start()
@@ -29,7 +28,7 @@ public class Hook : MonoBehaviour
 		//edge.points=new Vector2[10];
 		line = GetComponent<LineRenderer>();
 		linePoints = new List<Vector2>();
-		unwindLimits = new List<Vector2>();
+		//unwindLimits = new List<Vector2>();
 		groundMask = LayerMask.GetMask("Ground");
 	}
 	
@@ -44,7 +43,7 @@ public class Hook : MonoBehaviour
 			}
 			DrawLine();		
 		}
-		oldPos = player.position;
+		//oldPos = player.position;
 	}
 
 	public void RopeHit(Collision2D col, Vector2 colliderOffset)
@@ -81,7 +80,7 @@ public class Hook : MonoBehaviour
 
 		//if we have a new joint lets fix it!
 		if (newJoint != Vector2.zero) {
-			unwindLimits.Add(new Vector2(playerPoint.x, -player.rigidbody2D.velocity.x));
+			//unwindLimits.Add(new Vector2(playerPoint.x, -player.rigidbody2D.velocity.x));
 			float dist = -Vector2.Distance(currentJoint, newJoint);
 			linePoints.Add(newJoint);
 			shooter.MoveJoint(newJoint, dist);

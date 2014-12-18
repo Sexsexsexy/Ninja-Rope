@@ -123,10 +123,10 @@ public class PlayerController : MonoBehaviour
 		private void CheckWallRun ()
 		{
 				Vector2 topPoint = new Vector2 (transform.position.x + topReach.x * direction, transform.position.y + topReach.y);
-				Collider2D topcol = Physics2D.OverlapPoint (topPoint);
+				Collider2D topcol = Physics2D.OverlapPoint (topPoint, whatIsGround);
 
 				Vector2 botPoint = new Vector2 (transform.position.x + botReach.x * direction, transform.position.y + botReach.y);
-				Collider2D botcol = Physics2D.OverlapPoint (botPoint);
+				Collider2D botcol = Physics2D.OverlapPoint (botPoint, whatIsGround);
 
 				bool wasrunning = wallRunning;
 				wallRunning = false;

@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class SimpleSegment : Segment {
+﻿public class SimpleSegment : Segment {
 
 	public override void Randomize()
 	{

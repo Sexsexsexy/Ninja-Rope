@@ -178,9 +178,9 @@ public class Hook : MonoBehaviour
 				line.enabled = true;
 				edge.enabled = true;
 				edge.points = linePoints.ToArray ();
-				rigidbody2D.velocity = Vector2.zero;
-				rigidbody2D.isKinematic = false;
-				rigidbody2D.AddForce (force);
+				GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+				GetComponent<Rigidbody2D>().isKinematic = false;
+				GetComponent<Rigidbody2D>().AddForce (force);
 		}
 
 		public void Release ()
@@ -199,7 +199,7 @@ public class Hook : MonoBehaviour
 				if (!col.transform.CompareTag ("Player")) {
 						UpdateLine ();
 						hooked = true;
-						rigidbody2D.isKinematic = true;
+						GetComponent<Rigidbody2D>().isKinematic = true;
 						shooter.CreateJoint (transform.TransformPoint (anchorPoint));
 				}
 		}

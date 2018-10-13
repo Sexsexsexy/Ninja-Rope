@@ -50,7 +50,7 @@ public class PlayerController : MonoBehaviour
 		void Start ()
 		{
 				ropeHandler = GetComponent<RopeHandler> ();
-				animator = transform.FindChild ("SpriteHandler").GetComponent<Animator> ();
+				animator = transform.Find ("SpriteHandler").GetComponent<Animator> ();
 
 				wallRunTimer = 0;
 				direction = 1;
@@ -86,7 +86,7 @@ public class PlayerController : MonoBehaviour
 								//slide = false;
 						}
 						if (sliding) {
-								if (rigidbody2D.velocity.x < 1)
+								if (GetComponent<Rigidbody2D>().velocity.x < 1)
 										sliding = false;
 						} else
 								Run ();
@@ -96,10 +96,10 @@ public class PlayerController : MonoBehaviour
 						}
 				}
 
-				if (rigidbody2D.velocity.y < 0)
+				if (GetComponent<Rigidbody2D>().velocity.y < 0)
 						canWallRun = false;
 
-				if (rigidbody2D.velocity.x > 0)
+				if (GetComponent<Rigidbody2D>().velocity.x > 0)
 						ResetDirection ();
 
 				animator.SetBool ("Swinging", onRope);
@@ -140,18 +140,18 @@ public class PlayerController : MonoBehaviour
 				if (topcol == null) {
 						//Ledgegrab
 						int maxvel = 10;
-						if (ledgeTimer <= maxLedgeGrabFrames && rigidbody2D.velocity.y < maxvel) {
+						if (ledgeTimer <= maxLedgeGrabFrames && GetComponent<Rigidbody2D>().velocity.y < maxvel) {
 								if (ledgeTimer <= 0)
 										ledgeTimer = ledgeCooldown;
 
-								rigidbody2D.AddForce (new Vector2 (ledgePullForce / 4, ledgePullForce), ForceMode2D.Impulse);
+								GetComponent<Rigidbody2D>().AddForce (new Vector2 (ledgePullForce / 4, ledgePullForce), ForceMode2D.Impulse);
 						}
 				} else {
 						wallRunning = true;
 
 						//Wallrun
-						if (rigidbody2D.velocity.y > 0 && canWallRun) {
-								rigidbody2D.AddForce (new Vector2 (0, wallRunForce));
+						if (GetComponent<Rigidbody2D>().velocity.y > 0 && canWallRun) {
+								GetComponent<Rigidbody2D>().AddForce (new Vector2 (0, wallRunForce));
 								wallRunTimer++;
 
 								if (wallRunTimer >= maxWallRunFrames) {
@@ -161,57 +161,57 @@ public class PlayerController : MonoBehaviour
 								}
 						} else {
 								wallSliding = true;
-								rigidbody2D.AddForce (new Vector2 (0, Mathf.Clamp (wallSlideForce - rigidbody2D.velocity.y * 2, 0, 1) * wallSlideForce));
+								GetComponent<Rigidbody2D>().AddForce (new Vector2 (0, Mathf.Clamp (wallSlideForce - GetComponent<Rigidbody2D>().velocity.y * 2, 0, 1) * wallSlideForce));
 						}
 				}
 		}
 
 		private void Run ()
 		{
-				rigidbody2D.AddForce (Mathf.Clamp (runSpeed - rigidbody2D.velocity.x, -1, 1) * runAcceleration * Vector2.right);
+				GetComponent<Rigidbody2D>().AddForce (Mathf.Clamp (runSpeed - GetComponent<Rigidbody2D>().velocity.x, -1, 1) * runAcceleration * Vector2.right);
 		}
 
 		private void Jump ()
 		{
-				if ((wallRunning || wallSliding) && rigidbody2D.velocity.y != 0) {
+				if ((wallRunning || wallSliding) && GetComponent<Rigidbody2D>().velocity.y != 0) {
 						canWallRun = true;
 
 						direction = -direction;
 
-						transform.FindChild ("SpriteHandler").localScale = new Vector3 (direction, 1, 1);
+						transform.Find ("SpriteHandler").localScale = new Vector3 (direction, 1, 1);
 
 						float yfactor = 0.60f;
 						float xfactor = 0.70f;
 
-						rigidbody2D.AddForce (jumpForce * new Vector2 (xfactor * direction, yfactor), ForceMode2D.Impulse);
+						GetComponent<Rigidbody2D>().AddForce (jumpForce * new Vector2 (xfactor * direction, yfactor), ForceMode2D.Impulse);
 
 						jump = false;
 						wallRunTimer = maxWallRunFrames / 2;
            
 				} else if (grounded) {
-						rigidbody2D.AddForce (jumpForce * Vector2.up, ForceMode2D.Impulse);
+						GetComponent<Rigidbody2D>().AddForce (jumpForce * Vector2.up, ForceMode2D.Impulse);
 						jump = false;
 				}
 		}
 
 		private void ResetDirection ()
 		{
-				if (rigidbody2D.velocity.x > 0)
+				if (GetComponent<Rigidbody2D>().velocity.x > 0)
 						direction = 1;
 
-				transform.FindChild ("SpriteHandler").localScale = new Vector3 (direction, 1, 1);
+				transform.Find ("SpriteHandler").localScale = new Vector3 (direction, 1, 1);
 		}
 
 		private void Dash ()
 		{
-				rigidbody2D.AddForce (dashForce * dash, ForceMode2D.Impulse);
+				GetComponent<Rigidbody2D>().AddForce (dashForce * dash, ForceMode2D.Impulse);
 				dash = Vector2.zero;
 				animator.SetTrigger ("Dash");
 		}
 
 		private void Slide ()
 		{
-				rigidbody2D.AddForce (slideForce * Vector2.right, ForceMode2D.Impulse);
+				GetComponent<Rigidbody2D>().AddForce (slideForce * Vector2.right, ForceMode2D.Impulse);
 				slide = false;
 				sliding = true;
 		}

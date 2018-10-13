@@ -32,6 +32,7 @@ public class PlayerController : MonoBehaviour
     public Transform groundCheck;
     public float groundRadius;
     public LayerMask whatIsGround;
+    public LayerMask whatIsWallRunnable;
 
     public bool holdRope;
     public bool onRope;
@@ -130,8 +131,8 @@ public class PlayerController : MonoBehaviour
 
     private void CheckWallRun()
     {
-        RaycastHit2D topcol = Physics2D.Linecast(transform.position, transform.position + new Vector3(topReach.x * direction, topReach.y, 0), whatIsGround);
-        RaycastHit2D botcol = Physics2D.Linecast(transform.position, transform.position + new Vector3(botReach.x * direction, botReach.y, 0), whatIsGround);
+        RaycastHit2D topcol = Physics2D.Linecast(transform.position, transform.position + new Vector3(topReach.x * direction, topReach.y, 0), whatIsWallRunnable);
+        RaycastHit2D botcol = Physics2D.Linecast(transform.position, transform.position + new Vector3(botReach.x * direction, botReach.y, 0), whatIsWallRunnable);
 
         bool wasrunning = wallRunning;
         wallRunning = false;

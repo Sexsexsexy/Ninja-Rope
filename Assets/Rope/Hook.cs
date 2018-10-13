@@ -22,7 +22,7 @@ public class Hook : MonoBehaviour
         line = transform.parent.gameObject.GetComponentInChildren<LineRenderer>();
         rigidBody = GetComponent<Rigidbody2D>();
         linePoints = new List<Vector2>();
-        groundMask = LayerMask.GetMask("Ground");
+        groundMask = LayerMask.GetMask(new string[] { "Ground", "Ropeable" });
     }
 
     // Update is called once per frame
